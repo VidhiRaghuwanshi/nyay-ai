@@ -1,6 +1,5 @@
 """Case Prediction Service - Predicts delay and success rate from judicial dataset"""
 import logging
-import random
 import math
 from typing import Dict, Any, List, Optional
 from .data_loader import data_loader
@@ -302,6 +301,74 @@ class CasePredictionService:
             "by_case_type": summarize(type_breakdown),
             "by_state": summarize(state_breakdown),
             "by_court": summarize(court_breakdown),
+        }
+
+    def evaluate_delay_model(self, test_fraction: float = 0.2) -> Dict[str, Any]:
+        """Evaluate delay estimates on a deterministic holdout from the delay dataset."""
+        frame = self.data_loader.judicial_data
+        if frame is None or frame.empty:
+            return {
+                "evaluation_status": "unavailable",
+                "evaluation_note": "The judicial delay dataset is not loaded.",
+                "sample_size": 0,
+            }
+
+        if not 0 < test_fraction < 1:
+            raise ValueError("test_fraction must be between 0 and 1.")
+
+        rows = frame.reset_index(drop=True).copy()
+        split_index = max(1, min(len(rows) - 1, round(len(rows) * (1 - test_fraction))))
+        train = rows.iloc[:split_index]
+        test = rows.iloc[split_index:]
+        global_mean = float(train["delay_months"].mean())
+        group_columns = ["case_type", "court_level", "state"]
+        grouped = train.groupby(group_columns)["delay_months"].mean().to_dict()
+
+        actual = []
+        predicted = []
+        for _, row in test.iterrows():
+            key = (row["case_type"], row["court_level"], row["state"])
+            estimate = grouped.get(key)
+            if estimate is None:
+                estimate = global_mean
+            actual.append(float(row["delay_months"]))
+            predicted.append(float(estimate))
+
+        errors = [estimate - observed for estimate, observed in zip(predicted, actual)]
+        absolute_errors = [abs(error) for error in errors]
+        squared_errors = [error * error for error in errors]
+        actual_mean = sum(actual) / len(actual)
+        total_variance = sum((value - actual_mean) ** 2 for value in actual)
+        residual_sum = sum(squared_errors)
+        mae = sum(absolute_errors) / len(actual)
+        rmse = math.sqrt(residual_sum / len(actual))
+        r2 = 1 - (residual_sum / total_variance) if total_variance else 0.0
+        within_6_months = sum(error <= 6 for error in absolute_errors) / len(actual)
+
+        return {
+            "evaluation_status": "evaluated",
+            "target": "delay_months",
+            "dataset": "judicial_delay_dataset.csv",
+            "sample_size": len(actual),
+            "train_size": len(train),
+            "test_size": len(test),
+            "test_fraction": round(len(test) / len(rows), 4),
+            "split_method": "deterministic chronological holdout",
+            "metrics": {
+                "mae_months": round(mae, 4),
+                "rmse_months": round(rmse, 4),
+                "r2": round(r2, 4),
+                "within_6_months": round(within_6_months, 4),
+            },
+            "error_distribution": {
+                "mean_error_months": round(sum(errors) / len(errors), 4),
+                "median_absolute_error_months": round(sorted(absolute_errors)[len(absolute_errors) // 2], 4),
+                "max_absolute_error_months": round(max(absolute_errors), 4),
+            },
+            "limitations": [
+                "This evaluates delay duration only; it is not an outcome win-rate accuracy.",
+                "The holdout is chronological because the source data has no event timestamp suitable for random stratification.",
+            ],
         }
 
 

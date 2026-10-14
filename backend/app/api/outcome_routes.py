@@ -23,10 +23,13 @@ async def get_calibration_metrics():
     """Get calibration metrics"""
     try:
         return {
-            "model_accuracy": 0.82,
-            "calibration_quality": 0.96,
-            "data_points": 156,
-            "last_updated": "2024-01-15"
+            "model_accuracy": None,
+            "calibration_quality": None,
+            "calibration_error": None,
+            "data_points": 0,
+            "evaluation_status": "not_evaluated",
+            "evaluation_note": "Provide labeled historical outcomes before reporting accuracy or calibration metrics.",
+            "last_updated": None,
         }
     except Exception as e:
         logger.error(f"Error getting calibration: {str(e)}")

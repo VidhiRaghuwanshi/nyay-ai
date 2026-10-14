@@ -14,21 +14,6 @@ export default function ContradictionDetector() {
   const [counterArguments, setCounterArguments] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
 
-  // Fallback data
-  const fallbackIssues = [
-    { id: 1, type: 'contradiction', severity: 'high', title: 'Contradictory Statements', description: 'Statement about witness availability contradicts filing date', location: 'Paragraph 3, Line 5', suggestion: 'Clarify witness availability or adjust dates' },
-    { id: 2, type: 'missing', severity: 'high', title: 'Missing Evidence — Intent', description: 'Fraud case requires proof of intent. Currently missing.', location: 'Section 2', suggestion: 'Add documentary evidence of fraudulent intent' },
-    { id: 3, type: 'weak', severity: 'medium', title: 'Weak Precedent Reference', description: 'Cited case (2005) weakly supports current argument', location: 'Paragraph 5', suggestion: 'Reference more recent precedents or provide stronger connection' },
-    { id: 4, type: 'missing', severity: 'medium', title: 'Missing Supporting Documentation', description: 'Claim lacks supporting date-stamped evidence', location: 'Claim Section 1', suggestion: 'Attach timestamped proof or official records' },
-    { id: 5, type: 'procedural', severity: 'low', title: 'Procedural Note', description: 'Petition should specify relief sought more clearly', location: 'Relief Section', suggestion: 'Add specific quantifiable relief amounts' },
-  ];
-
-  const fallbackCounterArgs = [
-    { id: 1, argument: 'Opposing counsel may challenge witness credibility based on timeline inconsistencies', likelihood: 75 },
-    { id: 2, argument: 'Lack of intent evidence is critical weakness for fraud charges', likelihood: 88 },
-    { id: 3, argument: 'Precedent is distinguishable due to different facts in 2005 case', likelihood: 62 },
-  ];
-
   const handleAnalyze = async () => {
     if (caseText.trim().length < 20) return;
     setLoading(true);
@@ -40,40 +25,23 @@ export default function ContradictionDetector() {
       if (result && !result.error) {
         setRiskScore(Math.round(result.overall_risk_score || 0));
         setRiskLevel(result.risk_level || '');
-        setIssues(result.issues?.length > 0 ? result.issues : fallbackIssues);
+        setIssues(result.issues || []);
         setCounterArguments(
-          result.counter_arguments?.map((ca, idx) => ({
+          (result.counter_arguments || []).map((ca, idx) => ({
             id: idx + 1,
             argument: ca.argument,
             likelihood: Math.round(ca.likelihood)
-          })) || fallbackCounterArgs
+          }))
         );
-        setRecommendations(result.recommendations || [
-          'Resolve all high-severity contradictions first',
-          'Add missing documentary evidence',
-          'Update precedent citations to recent cases',
-          'Address counter-arguments proactively',
-          'Clarity on specific relief sought'
-        ]);
+        setRecommendations(result.recommendations || []);
         setAnalyzed(true);
       } else {
         throw new Error(result?.error || 'Analysis failed');
       }
     } catch (err) {
       console.error('Risk analysis failed:', err);
-      setError('Backend analysis failed. Showing simulated results.');
-      // Use fallback data
-      setRiskScore(Math.floor(Math.random() * 100));
-      setIssues(fallbackIssues);
-      setCounterArguments(fallbackCounterArgs);
-      setRecommendations([
-        'Resolve all high-severity contradictions first',
-        'Add missing documentary evidence',
-        'Update precedent citations to recent cases',
-        'Address counter-arguments proactively',
-        'Clarity on specific relief sought'
-      ]);
-      setAnalyzed(true);
+      setError(err.response?.data?.detail || 'Backend analysis failed. Start the backend and try again.');
+      setAnalyzed(false);
     } finally {
       setLoading(false);
     }

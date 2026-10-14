@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Clock, TrendingUp, Loader2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import PageHeader from '../components/PageHeader';
@@ -39,7 +39,7 @@ export default function ProceduralFlow() {
     }
   };
 
-  const fetchTimeline = async () => {
+  const fetchTimeline = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -55,7 +55,8 @@ export default function ProceduralFlow() {
           delayLikelihood: result.delay_probability,
           worstCase: result.worst_case_duration,
           delayFactors: result.delay_factors,
-          stageWiseRisk: result.stage_wise_risk
+          stageWiseRisk: result.stage_wise_risk,
+          dataEvidence: result.data_evidence
         });
       }
     } catch (err) {
@@ -65,12 +66,12 @@ export default function ProceduralFlow() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [caseType, court, state]);
 
   // Fetch on mount and when filters change
   useEffect(() => {
     fetchTimeline();
-  }, [caseType, court, state]);
+  }, [fetchTimeline]);
 
   // Use backend data if available, else fallback
   const currentData = backendData || fallbackTimeline[caseType];
@@ -242,6 +243,27 @@ export default function ProceduralFlow() {
               ))}
             </div>
           </div>
+
+          {backendData?.dataEvidence && (
+            <div className="glass-card" style={{ padding: 20 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)', marginBottom: 10 }}>Dataset Evidence</h3>
+              <p style={{ fontSize: 11, color: 'var(--ink-faint)', marginBottom: 12 }}>
+                Estimates use the matching public NDAP backlog row instead of a static timeline.
+              </p>
+              {[
+                ['Pending cases', backendData.dataEvidence.pending_cases?.toLocaleString()],
+                ['Cases aged 5+ years', backendData.dataEvidence.aged_cases?.toLocaleString()],
+                ['Monthly instituted', backendData.dataEvidence.monthly_instituted?.toLocaleString()],
+                ['Monthly disposed', backendData.dataEvidence.monthly_disposed?.toLocaleString()],
+              ].map(([label, value]) => (
+                <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: '1px solid var(--border)', fontSize: 12 }}>
+                  <span style={{ color: 'var(--ink-muted)' }}>{label}</span>
+                  <strong style={{ color: 'var(--ink)' }}>{value ?? '—'}</strong>
+                </div>
+              ))}
+              <p style={{ fontSize: 10, color: 'var(--ink-faint)', marginTop: 10 }}>Source: {backendData.dataEvidence.source}</p>
+            </div>
+          )}
 
           <div className="glass-card" style={{ padding: 20 }}>
             <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)', marginBottom: 14 }}>Stage-wise Delay Risk</h3>

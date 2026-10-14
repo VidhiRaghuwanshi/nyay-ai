@@ -1,24 +1,13 @@
-"""Google API Integration for Chatbot and AI"""
+"""Compatibility service for Gemini embeddings and shared Groq text generation."""
 import os
 import re
 from app.config.settings import settings
-
-try:
-    from google.cloud import aiplatform
-    from google.api_core.gapic_v1 import client_info
-except ImportError:
-    aiplatform = None
-    client_info = None
+from app.services.text_generation_service import TextGenerationError, TextGenerationService
 
 try:
     from google import genai as google_genai
 except ImportError:
     google_genai = None
-
-try:
-    import google.generativeai as genai
-except ImportError:
-    genai = None
 
 from typing import Optional
 import logging
@@ -30,9 +19,14 @@ class GoogleAPIClient:
     
     def __init__(self, api_key: Optional[str] = None, project_id: Optional[str] = None):
         """Initialize Google API client"""
-        self.api_key = api_key or settings.GOOGLE_API_KEY or os.getenv("GOOGLE_API_KEY")
-        self.project_id = project_id or settings.GOOGLE_PROJECT_ID or os.getenv("GOOGLE_PROJECT_ID")
+        self.api_key = (
+            settings.GOOGLE_API_KEY if api_key is None and settings.GOOGLE_API_KEY else api_key
+        ) or (os.getenv("GOOGLE_API_KEY") if api_key is None else None)
+        self.project_id = (
+            settings.GOOGLE_PROJECT_ID if project_id is None else project_id
+        ) or (os.getenv("GOOGLE_PROJECT_ID") if project_id is None else None)
         self.client = None
+        self.text_generation = TextGenerationService()
 
         if self.api_key:
             if google_genai:
@@ -40,15 +34,39 @@ class GoogleAPIClient:
                     self.client = google_genai.Client(api_key=self.api_key)
                     logger.info("Google GenAI client configured")
                 except Exception as exc:
-                    logger.warning(f"Google GenAI client configuration failed: {exc}")
-            elif genai:
-                try:
-                    genai.configure(api_key=self.api_key)
-                    logger.info("Google Generative AI configured")
-                except Exception as exc:
-                    logger.warning(f"Google API configuration failed: {exc}")
-        if not self.api_key or (not self.client and not genai):
-            logger.warning("GOOGLE_API_KEY not set or Google SDK not installed. Using mock responses.")
+                    logger.warning("Google GenAI client configuration failed: %s", exc)
+        if not self.api_key or not self.client:
+            logger.warning("Google GenAI is not configured.")
+
+    @staticmethod
+    def _service_error(detail: str) -> dict:
+        return {
+            "success": False,
+            "error": "Text generation service unavailable",
+            "detail": detail,
+        }
+
+    def generate_text(self, prompt: str, *, response_mime_type: str | None = None) -> str:
+        return self.text_generation.generate(prompt, response_mime_type=response_mime_type)
+
+    def generate_embedding(self, text: str) -> list[float]:
+        if not text or not text.strip():
+            return []
+        if not self.api_key:
+            raise RuntimeError("Please check the Gemini API configuration.")
+        if not self.client:
+            raise RuntimeError("The Google GenAI SDK is not installed or could not initialize.")
+        response = self.client.models.embed_content(
+            model=settings.GOOGLE_EMBEDDING_MODEL,
+            contents=text,
+        )
+        embeddings = getattr(response, "embeddings", None) or []
+        if not embeddings:
+            raise RuntimeError("Gemini returned an empty embedding.")
+        values = getattr(embeddings[0], "values", None)
+        if not values:
+            raise RuntimeError("Gemini returned an empty embedding.")
+        return [float(value) for value in values]
     
     async def generate_chatbot_response(self, 
                                        query: str,
@@ -76,10 +94,6 @@ class GoogleAPIClient:
                     "model": "grounded_extraction",
                     "status": "success",
                 }
-
-            if not self.api_key or (not self.client and not genai):
-                logger.warning("Google API key not configured. Using knowledge base.")
-                return self._get_mock_response(query, document_context)
 
             system_prompt = """You are an expert legal advisor specialized in the Indian Judiciary system.
 Provide accurate legal information based on:
@@ -115,42 +129,15 @@ CRITICAL RULES:
                     f"Q: {turn.get('question', '')}\nA: {turn.get('answer', '')}" for turn in chat_history[-6:]
                 )
 
-            model_name = "gemini-3.6-flash"
-
-            if self.client:
-                try:
-                    from google.genai import types
-                    response = self.client.models.generate_content(
-                        model=model_name,
-                        contents=full_prompt,
-                        config=types.GenerateContentConfig(
-                            temperature=0.7,
-                            top_p=0.9,
-                            max_output_tokens=1024,
-                        ),
-                    )
-                    text = getattr(response, "text", "") or ""
-                except Exception:
-                    response = self.client.models.generate_content(model=model_name, contents=full_prompt)
-                    text = getattr(response, "text", "") or ""
-            else:
-                model = genai.GenerativeModel(
-                    model_name=model_name,
-                    generation_config=genai.types.GenerationConfig(
-                        temperature=0.7,
-                        top_p=0.9,
-                        max_output_tokens=1024,
-                    )
-                )
-                response = model.generate_content(full_prompt)
-                text = getattr(response, "text", "") or ""
+            model_name = settings.GROQ_MODEL
+            text = self.generate_text(full_prompt)
 
             if document_context and self._is_unhelpful_document_answer(text, document_context["text"]):
                 grounded_fallback = self._answer_document_question(query, document_context, force=True)
                 if grounded_fallback:
                     return {
                         "response": grounded_fallback,
-                        "source": "Case Document Analysis (Gemini response corrected)",
+                        "source": "Case Document Analysis (Groq response corrected)",
                         "verified": True,
                         "model": "grounded_extraction",
                         "status": "corrected",
@@ -158,33 +145,25 @@ CRITICAL RULES:
 
             return {
                 "response": text,
-                "source": "Google Generative AI (Gemini)",
+                "source": "Groq",
                 "verified": True,
                 "model": model_name,
                 "status": "success"
             }
 
-        except Exception as e:
-            logger.error(f"Error generating chatbot response: {str(e)}")
+        except (TextGenerationError, RuntimeError) as e:
+            logger.error("Error generating chatbot response: %s", e)
             if document_context and document_context.get("text"):
                 grounded_fallback = self._answer_document_question(query, document_context, force=True)
                 if grounded_fallback:
-                    quota_error = "RESOURCE_EXHAUSTED" in str(e) or "429" in str(e)
                     return {
                         "response": grounded_fallback,
-                        "source": "Case Document Analysis (Gemini quota fallback)" if quota_error else "Case Document Analysis (fallback)",
+                        "source": "Case Document Analysis (Groq unavailable)",
                         "verified": True,
                         "model": "grounded_extraction",
-                        "status": "quota_fallback" if quota_error else "fallback",
-                        "quota_notice": "Gemini API quota is exhausted; this answer was extracted from the uploaded case record." if quota_error else None,
+                        "status": "grounded_only",
                     }
-            return {
-                "response": self._get_mock_response(query, document_context)["response"],
-                "source": "Legal Knowledge Base (Fallback)",
-                "verified": True,
-                "model": "mock",
-                "status": "fallback"
-            }
+            return self._service_error(str(e))
 
     @staticmethod
     def _answer_document_question(query: str, document_context: Optional[dict], force: bool = False) -> Optional[str]:
@@ -244,11 +223,6 @@ CRITICAL RULES:
     async def classify_legal_issue(self, text: str) -> dict:
         """Classify legal issue using AI"""
         try:
-            if not self.api_key or not genai:
-                return self._mock_classification()
-            
-            model = genai.GenerativeModel('gemini-pro')
-            
             prompt = f"""Analyze this legal case and classify:
             1. Case type (Criminal/Civil)
             2. Relevant sections of law
@@ -256,27 +230,19 @@ CRITICAL RULES:
             4. Estimated severity
             
             Case text: {text}"""
-            
-            response = model.generate_content(prompt)
-            
             return {
-                "classification": response.text,
-                "source": "Google AI",
+                "classification": self.generate_text(prompt),
+                "source": "Groq",
                 "success": True
             }
-            
+
         except Exception as e:
-            logger.error(f"Error classifying legal issue: {str(e)}")
-            return self._mock_classification()
+            logger.error("Error classifying legal issue: %s", e)
+            return self._service_error(str(e))
     
     async def extract_case_entities(self, text: str) -> dict:
         """Extract entities from case text"""
         try:
-            if not self.api_key or not genai:
-                return self._mock_entity_extraction()
-            
-            model = genai.GenerativeModel('gemini-pro')
-            
             prompt = f"""Extract legal entities from this text:
             - Case name
             - Parties involved
@@ -285,21 +251,18 @@ CRITICAL RULES:
             - Relief sought
             
             Text: {text}"""
-            
-            response = model.generate_content(prompt)
-            
             return {
-                "entities": response.text,
+                "entities": self.generate_text(prompt),
                 "success": True
             }
-            
+
         except Exception as e:
-            logger.error(f"Error extracting entities: {str(e)}")
-            return self._mock_entity_extraction()
+            logger.error("Error extracting entities: %s", e)
+            return self._service_error(str(e))
     
     @staticmethod
     def _get_mock_response(query: str, document_context: dict = None) -> dict:
-        """Get mock response when API key not available"""
+        """Legacy compatibility helper; not used by provider-backed routes."""
         
         # Comprehensive legal knowledge base
         legal_kb = {

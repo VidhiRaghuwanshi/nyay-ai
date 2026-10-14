@@ -16,7 +16,7 @@ import {
   ChevronRight,
   Scale,
 } from 'lucide-react';
-import { chatbotAPI, precedentAPI, riskDetectorAPI } from '../services/api';
+import { chatbotAPI, legaltechAPI, outcomeAPI, precedentAPI, proceduralAPI, riskDetectorAPI } from '../services/api';
 
 const emptyCase = {
   title: 'New case',
@@ -118,10 +118,10 @@ const buildLegalSummary = (text, metadata = {}) => {
     riskFactors: [],
     precedents: [],
     metrics: {
-      overallRisk: riskList.some((item) => item.level === 'High') ? 78 : 62,
-      winProbability: 69,
-      evidenceQuality: 77,
-      proceduralScore: 74,
+      overallRisk: 0,
+      winProbability: 0,
+      evidenceQuality: 0,
+      proceduralScore: 0,
     },
   };
 };
@@ -221,6 +221,7 @@ export default function CaseWorkspace() {
   const [graphData, setGraphData] = useState({ nodes: [], edges: [] });
   const [chatInput, setChatInput] = useState('What are the main risks in this case?');
   const [chatHistory, setChatHistory] = useState([]);
+  const [chronologyEvents, setChronologyEvents] = useState([]);
 
   useEffect(() => {
     if (!isNewCase) {
@@ -233,6 +234,7 @@ export default function CaseWorkspace() {
           setFiles((savedCase.files || []).map((name) => ({ name })));
           setDocumentMetadata(savedCase.metadata || {});
           setChatHistory([]);
+          setChronologyEvents(savedCase.chronologyEvents || []);
         } catch {
           localStorage.removeItem('legalai_cases');
         }
@@ -248,6 +250,7 @@ export default function CaseWorkspace() {
       setGraphData({ nodes: [], edges: [] });
       setDocumentMetadata({});
       setChatHistory([]);
+      setChronologyEvents([]);
     }
   }, [isNewCase, freshCaseId]);
 
@@ -265,6 +268,7 @@ export default function CaseWorkspace() {
         caseText,
         files: files.map((file) => file.name),
         metadata: documentMetadata,
+        chronologyEvents,
         title: autoSummary.title,
         updatedAt: new Date().toISOString(),
       };
@@ -274,7 +278,7 @@ export default function CaseWorkspace() {
       localStorage.setItem('legalai_active_case', JSON.stringify(savedCase));
       window.dispatchEvent(new Event('legalai-case-saved'));
     }
-  }, [caseText, files, conversationId, documentMetadata]);
+  }, [caseText, files, conversationId, documentMetadata, chronologyEvents]);
 
   useEffect(() => {
     if (!caseText.trim()) return undefined;
@@ -287,6 +291,28 @@ export default function CaseWorkspace() {
         const [riskResult, precedentResult] = await Promise.all([
           riskDetectorAPI.analyze(caseText, caseType.toLowerCase()),
           precedentAPI.search(caseText.slice(0, 3000), caseType),
+        ]);
+        if (cancelled) return;
+        const evidenceQuality = Math.max(
+          0,
+          Math.min(100, 100 - Number(riskResult.overall_risk_score || 0)),
+        );
+        const precedentStrength = Math.max(
+          0,
+          Math.min(100, (precedentResult.similar_cases || []).length * 15),
+        );
+        const [outcomeResult, proceduralResult] = await Promise.all([
+          outcomeAPI.predict({
+            case_type: caseType,
+            evidence_quality: evidenceQuality,
+            precedent_strength: precedentStrength,
+            description: caseText.slice(0, 6000),
+          }),
+          proceduralAPI.predict(
+            caseType,
+            caseData.court && caseData.court !== 'Court not detected' ? caseData.court : 'district',
+            caseData.state && caseData.state !== 'State not detected' ? caseData.state : 'Delhi',
+          ),
         ]);
         if (cancelled) return;
         setCaseData((prev) => ({
@@ -303,7 +329,12 @@ export default function CaseWorkspace() {
           metrics: {
             ...prev.metrics,
             overallRisk: Math.round(riskResult.overall_risk_score || 0),
-            evidenceQuality: Math.max(0, Math.min(100, 100 - (riskResult.overall_risk_score || 0))),
+            winProbability: Math.round(outcomeResult.win_probability || 0),
+            evidenceQuality,
+            proceduralScore: Math.max(
+              0,
+              Math.min(100, Math.round(100 - (proceduralResult.delay_probability || 0))),
+            ),
           },
         }));
         setGraphData(precedentResult.graph || { nodes: [], edges: [] });
@@ -315,7 +346,7 @@ export default function CaseWorkspace() {
     };
     loadAnalysis();
     return () => { cancelled = true; };
-  }, [caseText, caseData.caseType]);
+  }, [caseText, caseData.caseType, caseData.court, caseData.state]);
 
   const handleFiles = async (selectedFiles) => {
     const nextFiles = Array.from(selectedFiles || []);
@@ -331,9 +362,23 @@ export default function CaseWorkspace() {
       const metadata = uploads.map((upload) => upload.metadata || {}).find((item) => Object.values(item).some((value) => value && value !== 'Not detected')) || {};
 
       if (combinedText.trim()) {
+        let extractedEvents = [];
+        try {
+          const chronologyResult = await legaltechAPI.extractChronology(
+            { matter_id: conversationId, text: combinedText },
+          );
+          extractedEvents = chronologyResult.events || [];
+          setChronologyEvents(extractedEvents);
+        } catch (chronologyError) {
+          setUploadError(`Files uploaded, but chronology extraction failed: ${chronologyError.response?.data?.detail || 'check the backend connection.'}`);
+        }
         setDocumentMetadata(metadata);
         setCaseText(combinedText);
-        setUploadError(failures.length ? `${uploads.length} file(s) uploaded. ${failures.length} file(s) failed.` : `${uploads.length} file(s) uploaded and saved.`);
+        if (!failures.length && extractedEvents.length) {
+          setUploadError(`${uploads.length} file(s) uploaded and saved. ${extractedEvents.length} chronology event(s) found.`);
+        } else if (failures.length) {
+          setUploadError(`${uploads.length} file(s) uploaded. ${failures.length} file(s) failed. ${extractedEvents.length} chronology event(s) found.`);
+        }
       } else {
         const reason = failures[0]?.reason;
         throw new Error(reason?.response?.data?.detail || reason?.message || 'No readable text was extracted.');
@@ -355,6 +400,14 @@ export default function CaseWorkspace() {
       setChatHistory((previous) => [...previous, { question, answer: `Chat unavailable: ${error.response?.data?.detail || 'check that the backend and Google AI service are running.'}` }]);
     }
   };
+
+  const displayedTimeline = chronologyEvents.length
+    ? chronologyEvents.map((event) => ({
+      date: event.date_text,
+      label: event.description,
+      type: event.event_type === 'court_event' ? 'critical' : event.event_type === 'filing' ? 'start' : 'warning',
+    }))
+    : caseData.timeline;
 
   return (
     <div className="animate-fade-in">
@@ -395,7 +448,7 @@ export default function CaseWorkspace() {
                 {chatHistory.length ? chatHistory.map((turn, index) => (
                   <div key={`${turn.question}-${index}`} className="chat-turn">
                     <div className="chat-question"><strong>You</strong><p>{turn.question}</p></div>
-                    <div className="chat-answer"><strong>LegalAI</strong><p>{turn.answer}</p></div>
+                    <div className="chat-answer"><strong>Nyay AI</strong><p>{turn.answer}</p></div>
                   </div>
                 )) : null}
               </div>
@@ -457,7 +510,7 @@ export default function CaseWorkspace() {
             <div className="glass-card info-card">
               <div className="section-kicker"><CalendarDays size={14} /> Timeline</div>
               <div className="timeline-list">
-                {caseData.timeline.length ? caseData.timeline.map((item, idx) => (
+                {displayedTimeline.length ? displayedTimeline.map((item, idx) => (
                   <div key={idx} className={`timeline-item ${item.type}`}>
                     <span className="timeline-dot" />
                     <div><strong>{item.date}</strong><p>{item.label}</p></div>

@@ -1,6 +1,7 @@
 """Procedural Flow Engine Service"""
 import logging
 from typing import Dict, List, Any
+from .data_loader import data_loader
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +63,11 @@ class ProceduralFlowService:
             Timeline prediction with stages
         """
         try:
-            # Get timeline data
+            evidence = self._get_backlog_evidence(case_type, court, state)
+            if evidence:
+                return self._build_data_backed_timeline(case_type, court, state, evidence)
+
+            # Get timeline data when no matching public backlog row exists.
             timeline_key = court if court in ["district", "high"] else "district"
             case_key = case_type if case_type in ["criminal", "civil"] else "criminal"
             
@@ -90,6 +95,77 @@ class ProceduralFlowService:
         except Exception as e:
             logger.error(f"Error predicting timeline: {str(e)}")
             return {"error": str(e)}
+
+    def _get_backlog_evidence(self, case_type: str, court: str, state: str) -> Dict[str, Any] | None:
+        """Find a matching NDAP high-court row and derive measurable backlog signals."""
+        frame = data_loader.court_backlog_data
+        if frame is None or court.lower() not in {"high", "supreme"}:
+            return None
+
+        state_key = state.strip().lower()
+        type_key = case_type.strip().lower()
+        rows = frame[
+            frame["State"].astype(str).str.strip().str.lower().eq(state_key)
+            & frame["Court case type"].astype(str).str.strip().str.lower().eq(type_key)
+        ]
+        if rows.empty:
+            rows = frame[
+                frame["State"].astype(str).str.strip().str.lower().eq(state_key)
+                & frame["Court case type"].astype(str).str.strip().str.lower().eq("total")
+            ]
+        if rows.empty:
+            return None
+
+        row = rows.iloc[0]
+        age_columns = [
+            "Cases pending for a period of 5 to 10 years at high court",
+            "Cases pending for a period of 10 to 20 years at high court",
+            "Cases pending for a period of 20 to 30 years at high court",
+            "Cases pending for a period of more than 30 years at high court",
+        ]
+        total = float(row.get("Pending cases in high court", 0) or 0)
+        aged = sum(float(row.get(column, 0) or 0) for column in age_columns)
+        instituted = float(row.get("Cases that were instituted in last month", 0) or 0)
+        disposed = float(row.get("Cases that were disposed in last month", 0) or 0)
+        return {
+            "pending_cases": round(total, 2),
+            "aged_cases": round(aged, 2),
+            "aged_ratio": aged / total if total else 0,
+            "monthly_instituted": round(instituted, 2),
+            "monthly_disposed": round(disposed, 2),
+            "source": "NDAP_REPORT_7149.csv",
+        }
+
+    def _build_data_backed_timeline(self, case_type: str, court: str, state: str, evidence: Dict[str, Any]) -> Dict[str, Any]:
+        """Convert observed backlog and throughput into transparent timeline estimates."""
+        aged_ratio = min(1.0, max(0.0, evidence["aged_ratio"]))
+        throughput = evidence["monthly_instituted"] + evidence["monthly_disposed"]
+        pressure = evidence["pending_cases"] / max(throughput, 1)
+        expected_duration = max(6, min(180, round(12 + pressure * 0.35)))
+        delay_probability = round(min(95, max(5, aged_ratio * 70 + min(25, pressure / 12))), 1)
+        stages = [
+            {"stage": "Filing and Admission", "duration": max(1, round(expected_duration * 0.08)), "delay_prob": round(delay_probability * 0.55, 1)},
+            {"stage": "Evidence and Hearings", "duration": max(1, round(expected_duration * 0.52)), "delay_prob": round(delay_probability, 1)},
+            {"stage": "Arguments", "duration": max(1, round(expected_duration * 0.22)), "delay_prob": round(delay_probability * 0.82, 1)},
+            {"stage": "Judgment", "duration": max(1, round(expected_duration * 0.18)), "delay_prob": round(delay_probability * 0.68, 1)},
+        ]
+        return {
+            "case_type": case_type,
+            "court": court,
+            "state": state,
+            "expected_duration": expected_duration,
+            "worst_case_duration": min(240, round(expected_duration * (1 + delay_probability / 100))),
+            "delay_probability": delay_probability,
+            "stages": stages,
+            "delay_factors": {
+                "court_backlog": round(min(60, pressure / 10), 1),
+                "aged_pending_cases": round(aged_ratio * 100, 1),
+                "monthly_throughput": round(min(30, throughput / max(evidence["pending_cases"], 1) * 100), 1),
+                "other": 10,
+            },
+            "stage_wise_risk": self._calculate_stage_risk(stages),
+            "data_evidence": evidence,
+        }
     
     def _get_delay_factors(self) -> Dict[str, float]:
         """Get delay contributing factors"""

@@ -15,14 +15,19 @@ export default function CasePrediction() {
   const [form, setForm] = useState({ case_type: 'Criminal', court_level: 'District', state: 'Delhi', hearings: '', workload: '' });
   const [prediction, setPrediction] = useState(null);
   const [stats, setStats] = useState(null);
+  const [evaluation, setEvaluation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const data = await predictionAPI.getStats();
+        const [data, evaluationData] = await Promise.all([
+          predictionAPI.getStats(),
+          predictionAPI.getEvaluation(),
+        ]);
         setStats(data);
+        setEvaluation(evaluationData);
       } catch { /* ignore */ }
     };
     fetchStats();
@@ -219,6 +224,32 @@ export default function CasePrediction() {
                   </div>
                 )}
               </div>
+
+              {/* Comparable Cases */}
+              {evaluation?.evaluation_status === 'evaluated' && (
+                <div className="glass-card" style={{ padding: 24, marginBottom: 20 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)', marginBottom: 6 }}>Research Evaluation — Delay Model</h3>
+                  <p style={{ fontSize: 11, color: 'var(--ink-faint)', marginBottom: 14 }}>
+                    Deterministic holdout evaluation on {evaluation.dataset}; this is not an outcome win-rate metric.
+                  </p>
+                  <div className="stats-grid-4">
+                    {[
+                      ['MAE', `${evaluation.metrics.mae_months} mo.`],
+                      ['RMSE', `${evaluation.metrics.rmse_months} mo.`],
+                      ['R²', evaluation.metrics.r2],
+                      ['Within ±6 mo.', `${Math.round(evaluation.metrics.within_6_months * 100)}%`],
+                    ].map(([label, value]) => (
+                      <div key={label} style={{ padding: 12, background: 'var(--paper-warm)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
+                        <p style={{ fontSize: 10, color: 'var(--ink-faint)', fontWeight: 700, textTransform: 'uppercase' }}>{label}</p>
+                        <p style={{ fontSize: 20, fontWeight: 800, color: 'var(--legal-blue)', marginTop: 4 }}>{value}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{ fontSize: 10, color: 'var(--ink-faint)', marginTop: 12 }}>
+                    Train: {evaluation.train_size.toLocaleString()} · Test: {evaluation.test_size.toLocaleString()} · Split: {evaluation.split_method}
+                  </p>
+                </div>
+              )}
 
               {/* Comparable Cases */}
               {prediction.comparable_cases?.length > 0 && (

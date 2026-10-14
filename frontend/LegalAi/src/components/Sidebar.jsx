@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, FileText, Gauge, Plus, Scale } from 'lucide-react';
+import { BarChart3, Bell, CalendarDays, ChevronLeft, ChevronRight, FileSignature, FileText, Gauge, Mic, Plus, Scale } from 'lucide-react';
 
 export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
   const [savedCases, setSavedCases] = useState([]);
@@ -68,7 +68,7 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
           {!collapsed && (
             <div className="animate-fade-in">
               <div style={{ fontSize: 18, fontWeight: 800, fontFamily: 'var(--font-heading)', color: '#fff', letterSpacing: '-0.02em' }}>
-                LegalAI
+                Nyay AI
               </div>
               <div style={{ fontSize: 10, color: 'var(--ink-subtle)', fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                 Judiciary Intelligence
@@ -86,6 +86,26 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
           <Link className="history-tool-button" to="/drafting" onClick={() => setMobileOpen(false)} title="Open Auto Drafting">
             <FileText size={16} />
             {!collapsed && <span>Auto Drafting</span>}
+          </Link>
+          <Link className="history-tool-button" to="/dictation" onClick={() => setMobileOpen(false)} title="Open Legal Dictation">
+            <Mic size={16} />
+            {!collapsed && <span>Legal Dictation</span>}
+          </Link>
+          <Link className="history-tool-button" to="/chronology" onClick={() => setMobileOpen(false)} title="Open Evidence Chronology">
+            <CalendarDays size={16} />
+            {!collapsed && <span>Evidence Chronology</span>}
+          </Link>
+          <Link className="history-tool-button" to="/court-docket" onClick={() => setMobileOpen(false)} title="Open Court Docket Tracker">
+            <Bell size={16} />
+            {!collapsed && <span>Court Docket Tracker</span>}
+          </Link>
+          <Link className="history-tool-button" to="/client-portal" onClick={() => setMobileOpen(false)} title="Open Client Portal">
+            <FileSignature size={16} />
+            {!collapsed && <span>Client Portal</span>}
+          </Link>
+          <Link className="history-tool-button" to="/analytics" onClick={() => setMobileOpen(false)} title="Open Case Analytics">
+            <BarChart3 size={16} />
+            {!collapsed && <span>Case Analytics</span>}
           </Link>
 
           {!collapsed && <div className="case-history-label">Case history</div>}

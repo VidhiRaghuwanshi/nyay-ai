@@ -1,0 +1,127 @@
+srcStateName,High Court Name,High Court Bench,Court Case Type,Cases pending for a period of 0 to 1 year at High court,Cases pending for a period of 1 to 3 years at High court,Cases pending for a period of 3 to 5 years at High court,Cases pending for a period of 5 to 10 years at High court,Cases pending for a period of 10 to 20 years at High court,Cases pending for a period of 20 to 30 years at High court,Cases pending for a period of more than 30 years,Pending Cases in high court,Writ Petition Cases,Second Appeal Cases,First Appeal Cases,Appeal Cases,Petition Cases,Revision Cases,Reference Cases,Suit Cases,Review Cases,Application Cases,Cases that were Instituted in Last Month,Cases that were disposed in Last month,Cases filed by Senior Citizens,Cases filed by Woman,Year
+Andhra Pradesh,High Court of Andhra Pradesh,Principal Bench Andhra Pradesh,Civil,35677,37093,31663,50875,28996,2173,605,187082,110,11656,15236,22670,7603,10729,,23,1,310,4342,2762,16646,6764,2021
+Andhra Pradesh,High Court of Andhra Pradesh,Principal Bench Andhra Pradesh,Criminal,5405,9782,5758,7475,3485,446,25,32376,0,0,0,8409,13283,10720,,0,0,0,724,570,1942,967,2021
+Andhra Pradesh,High Court of Andhra Pradesh,Principal Bench Andhra Pradesh,Total,41082,46875,37421,58350,32481,2619,630,219458,110,11656,15236,31079,20886,21449,,23,1,310,5066,3332,18588,7731,2021
+Assam,Gauhati High Court,Aizawl Bench,Civil,299,197,65,34,,1,,596,248,22,104,34,63,12,,,6,107,46,37,80,107,2021
+Assam,Gauhati High Court,Aizawl Bench,Criminal,73,52,7,0,,0,,132,4,0,0,98,4,7,,,0,19,8,8,10,19,2021
+Assam,Gauhati High Court,Aizawl Bench,Total,372,249,72,34,,1,,728,252,22,104,132,67,19,,,6,126,54,45,90,126,2021
+Assam,Gauhati High Court,Itanagar Bench,Civil,327,668,284,237,197,3,,1716,,,,,,,,,,,,,16,35,2021
+Assam,Gauhati High Court,Itanagar Bench,Criminal,63,135,37,17,27,0,,279,,,,,,,,,,,,,4,11,2021
+Assam,Gauhati High Court,Itanagar Bench,Total,390,803,321,254,224,3,,1995,,,,,,,,,,,,,20,46,2021
+Assam,Gauhati High Court,Kohima Bench,Civil,284,712,121,36,4,,,1157,645,4,23,109,69,10,,,22,269,,,78,173,2021
+Assam,Gauhati High Court,Kohima Bench,Criminal,70,89,4,3,0,,,166,17,0,0,23,36,7,,,0,59,,,5,21,2021
+Assam,Gauhati High Court,Kohima Bench,Total,354,801,125,39,4,,,1323,662,4,23,132,105,17,,,22,328,,,83,194,2021
+Assam,Gauhati High Court,Principal Seat at Guwahati,Civil,11852,15452,7759,5395,651,9,,41118,22454,2447,2219,3791,2514,1125,0,,294,6271,1594,956,3918,5364,2021
+Assam,Gauhati High Court,Principal Seat at Guwahati,Criminal,3550,3055,1580,1915,93,0,,10193,43,0,0,2266,2883,2104,12,,0,2572,1308,1082,637,490,2021
+Assam,Gauhati High Court,Principal Seat at Guwahati,Total,15402,18507,9339,7310,744,9,,51311,22497,2447,2219,6057,5397,3229,12,,294,8843,2902,2038,4555,5854,2021
+Bihar,Patna High Court,Principal Bench Patna,Civil,26901,37373,21550,17366,3973,2662,2409,112234,72361,6668,5498,8420,17776,699,0,40,762,10,2358,1244,14687,9008,2021
+Bihar,Patna High Court,Principal Bench Patna,Criminal,52259,21198,15215,9940,15447,2000,0,116059,4657,0,0,36295,69980,5013,10,0,0,104,9881,4052,7253,5197,2021
+Bihar,Patna High Court,Principal Bench Patna,Total,79160,58571,36765,27306,19420,4662,2409,228293,77018,6668,5498,44715,87756,5712,10,40,762,114,12239,5296,21940,14205,2021
+Chhattisgarh,High Court Of Chhattisgarh,Principal Bench Chhattisgarh,Civil,14935,16311,9679,7859,878,13,,49675,28527,5101,3812,8590,2827,283,0,,198,337,2061,1995,7554,8438,2021
+Chhattisgarh,High Court Of Chhattisgarh,Principal Bench Chhattisgarh,Criminal,5761,7966,5354,6088,3045,162,,28376,0,0,0,17655,5235,5353,4,,0,129,1825,1650,1298,1561,2021
+Chhattisgarh,High Court Of Chhattisgarh,Principal Bench Chhattisgarh,Total,20696,24277,15033,13947,3923,175,,78051,28527,5101,3812,26245,8062,5636,4,,198,466,3886,3645,8852,9999,2021
+Delhi,High Court of Delhi,High Court of Delhi,Civil,20798,23199,10334,10948,7538,96,,72913,39558,1335,9835,12400,10040,0,3488,10583,,72,2906,1686,,,2021
+Delhi,High Court of Delhi,High Court of Delhi,Criminal,6520,8264,3035,5274,3484,3,,26580,2709,0,0,12982,8302,3649,17,0,,1681,1185,1151,,,2021
+Delhi,High Court of Delhi,High Court of Delhi,Total,27318,31463,13369,16222,11022,99,,99493,42267,1335,9835,25382,18342,3649,3505,10583,,1753,4091,2837,,,2021
+Gujarat,High Court of Gujarat,Gujarat High Court,Civil,23993,30651,18086,19243,9050,397,45,101465,506,2567,29408,8680,884,2247,41,177,,,645,574,8004,781,2021
+Gujarat,High Court of Gujarat,Gujarat High Court,Criminal,14451,12289,7816,8519,6949,640,1,50665,0,0,0,19406,0,5693,5,0,,,962,635,2901,1299,2021
+Gujarat,High Court of Gujarat,Gujarat High Court,Total,38444,42940,25902,27762,15999,1037,46,152130,506,2567,29408,28086,884,7940,46,177,,,1607,1209,10905,2080,2021
+Himachal Pradesh,High Court of Himachal Pradesh,Principal Bench Himachal P,Civil,29448,23565,7334,7749,1910,27,,70033,13180,5816,5311,1236,42645,628,3,956,129,116,3721,3386,9999,5515,2021
+Himachal Pradesh,High Court of Himachal Pradesh,Principal Bench Himachal P,Criminal,3239,2886,1362,2075,245,1,,9808,3,0,0,4316,3008,1797,1,0,0,680,750,972,640,275,2021
+Himachal Pradesh,High Court of Himachal Pradesh,Principal Bench Himachal P,Total,32687,26451,8696,9824,2155,28,,79841,13183,5816,5311,5552,45653,2425,4,956,129,796,4471,4358,10639,5790,2021
+Jammu and Kashmir,High Court of Jammu and Kashmir,Jammu Wing,Civil,4771,5427,5217,9172,3991,174,5,28757,10742,268,2076,2151,11562,215,28,1,312,1348,499,1563,2163,831,2021
+Jammu and Kashmir,High Court of Jammu and Kashmir,Jammu Wing,Criminal,1274,1280,826,1408,264,8,5,5065,0,0,0,1292,22,268,29,0,0,3454,158,226,471,209,2021
+Jammu and Kashmir,High Court of Jammu and Kashmir,Jammu Wing,Total,6045,6707,6043,10580,4255,182,10,33822,10742,268,2076,3443,11584,483,57,1,312,4802,657,1789,2634,1040,2021
+Jammu and Kashmir,High Court of Jammu and Kashmir,Srinagar Wing,Civil,3709,4009,2566,3494,577,35,2,14392,10001,130,435,646,1355,92,4,5,236,1365,433,779,2294,1168,2021
+Jammu and Kashmir,High Court of Jammu and Kashmir,Srinagar Wing,Criminal,768,571,145,143,74,0,0,1701,217,0,0,268,8,105,27,0,2,977,116,87,190,128,2021
+Jammu and Kashmir,High Court of Jammu and Kashmir,Srinagar Wing,Total,4477,4580,2711,3637,651,35,2,16093,10218,130,435,914,1363,197,31,5,238,2342,549,866,2484,1296,2021
+Jharkhand,High Court of Jharkhand,Principal Bench Jharkhand,Civil,10512,11958,6405,8244,4189,431,20,41759,25850,4481,1188,5956,3630,190,2,4,307,151,894,813,5624,3531,2021
+Jharkhand,High Court of Jharkhand,Principal Bench Jharkhand,Criminal,10276,9427,6422,7829,11364,776,0,46094,1032,0,0,23471,10436,6440,20,0,0,4695,3685,3325,2185,1424,2021
+Jharkhand,High Court of Jharkhand,Principal Bench Jharkhand,Total,20788,21385,12827,16073,15553,1207,20,87853,26882,4481,1188,29427,14066,6630,22,4,307,4846,4579,4138,7809,4955,2021
+Karnataka,High Court of Karnataka,Bench at Dharwad,Civil,8054,15194,10588,15011,6724,4,1,55576,16632,8840,23180,385,455,729,0,1,,5354,,,538,494,2021
+Karnataka,High Court of Karnataka,Bench at Dharwad,Criminal,1652,2210,1005,986,234,0,0,6087,0,0,0,2026,2476,0,7,0,,1578,,,123,66,2021
+Karnataka,High Court of Karnataka,Bench at Dharwad,Total,9706,17404,11593,15997,6958,4,1,61663,16632,8840,23180,2411,2931,729,7,1,,6932,,,661,560,2021
+Karnataka,High Court of Karnataka,Bench at Kalburagi,Civil,3688,6811,4062,4827,4922,2,,24312,5640,4154,8316,213,213,245,0,,,5531,84,437,329,63,2021
+Karnataka,High Court of Karnataka,Bench at Kalburagi,Criminal,519,538,357,275,272,0,,1961,0,0,0,902,374,0,1,,,684,82,210,35,5,2021
+Karnataka,High Court of Karnataka,Bench at Kalburagi,Total,4207,7349,4419,5102,5194,2,,26273,5640,4154,8316,1115,587,245,1,,,6215,166,647,364,68,2021
+Karnataka,High Court of Karnataka,Principal Bench at Bengaluru,Civil,31689,37173,26159,34571,27905,102,10,157609,48151,18316,53431,3632,2635,2129,2,20,,29293,833,4523,7778,559,2021
+Karnataka,High Court of Karnataka,Principal Bench at Bengaluru,Criminal,7961,8789,6018,6265,4595,4,0,33632,0,0,0,12813,8845,0,12,0,,11962,431,1416,1188,81,2021
+Karnataka,High Court of Karnataka,Principal Bench at Bengaluru,Total,39650,45962,32177,40836,32500,106,10,191241,48151,18316,53431,16445,11480,2129,14,20,,41255,1264,5939,8966,640,2021
+Kerala,High Court of Kerala,Principal Bench Kerala,Civil,38153,42369,35632,43121,12170,1056,16,172517,80428,12065,10272,41556,10366,6991,25,49,2260,8565,2011,3279,25545,5896,2021
+Kerala,High Court of Kerala,Principal Bench Kerala,Criminal,6993,10416,6095,10745,9628,113,0,43990,8,0,0,17383,732,13484,12,0,0,12372,17,344,3318,858,2021
+Kerala,High Court of Kerala,Principal Bench Kerala,Total,45146,52785,41727,53866,21798,1169,16,216507,80436,12065,10272,58939,11098,20475,37,49,2260,20937,6928,5741,28863,6754,2021
+Madhya Pradesh,High Court of Madhya Pradesh,Gwalior Bench,Civil,8421,9114,6802,12929,8871,1117,5,47259,23248,6227,3503,9341,2274,1556,6,,540,564,1284,936,8462,7691,2021
+Madhya Pradesh,High Court of Madhya Pradesh,Gwalior Bench,Criminal,6292,6208,4408,8213,4690,43,0,29854,0,0,0,14090,0,6401,33,,0,9330,1926,2278,2370,1886,2021
+Madhya Pradesh,High Court of Madhya Pradesh,Gwalior Bench,Total,14713,15322,11210,21142,13561,1160,5,77113,23248,6227,3503,23431,2274,7957,39,,540,9894,3210,3214,10832,9577,2021
+Madhya Pradesh,High Court of Madhya Pradesh,Indore Bench,Civil,10372,10614,6039,15631,9244,87,9,51996,20308,6584,8101,14527,847,636,151,1,309,524,1440,1401,7891,9290,2021
+Madhya Pradesh,High Court of Madhya Pradesh,Indore Bench,Criminal,7244,6107,4804,9917,5674,517,0,34263,0,0,0,21821,0,5946,10,0,0,6486,1907,2120,1678,2131,2021
+Madhya Pradesh,High Court of Madhya Pradesh,Indore Bench,Total,17616,16721,10843,25548,14918,604,9,86259,20308,6584,8101,36348,847,6582,161,1,309,7010,3347,3521,9569,11421,2021
+West Bengal,Calcutta High Court,Circuit Bench At Jalpaiguri,Criminal,454,86,,,,,,540,,,,,,,,,,,128,232,46,48,2021
+Madhya Pradesh,High Court of Madhya Pradesh,Principal Bench at Jabalpur,Civil,21105,34497,24423,38312,31893,1545,5,151780,75753,19775,11955,30246,7478,2856,121,,765,2821,,,27719,26093,2021
+Madhya Pradesh,High Court of Madhya Pradesh,Principal Bench at Jabalpur,Criminal,13263,17229,13116,21627,21350,3566,0,90151,0,0,0,51026,0,20083,37,,0,18993,,,5039,5805,2021
+Madhya Pradesh,High Court of Madhya Pradesh,Principal Bench at Jabalpur,Total,34368,51726,37539,59939,53243,5111,5,241931,75753,19775,11955,81272,7478,22939,158,,765,21814,,,32758,31898,2021
+Maharashtra,Bombay High Court,Bench at Aurangabad,Civil,30294,30490,23950,34896,39767,12465,422,172284,45364,9805,30461,1454,3458,0,2,,539,80516,3402,2261,19224,12592,2021
+Maharashtra,Bombay High Court,Bench at Aurangabad,Criminal,6452,5944,1896,3199,3810,19,0,21320,3070,0,0,8640,7,2015,0,,2,2317,928,856,1999,1671,2021
+Maharashtra,Bombay High Court,Bench at Aurangabad,Total,36746,36434,25846,38095,43577,12484,422,193604,48434,9805,30461,10094,3465,2015,2,,541,82833,4330,3117,21223,14263,2021
+Maharashtra,Bombay High Court,Bench at Nagpur,Civil,12948,18298,7895,11651,10165,617,10,61584,263,,,762,721,0,16,,,9336,1442,1345,9822,8659,2021
+Maharashtra,Bombay High Court,Bench at Nagpur,Criminal,3758,2935,1015,1691,688,1,0,10088,0,,,0,0,281,4,,,691,857,965,990,833,2021
+Maharashtra,Bombay High Court,Bench at Nagpur,Total,16706,21233,8910,13342,10853,618,10,71672,263,,,762,721,281,20,,,10027,2299,2310,10812,9492,2021
+Maharashtra,Bombay High Court,High Court of Bombay at Goa,Civil,786,1751,1107,1291,313,2,,5250,,,,,,,,,,,110,138,710,791,2021
+Maharashtra,Bombay High Court,High Court of Bombay at Goa,Criminal,114,178,138,57,1,0,,488,,,,,,,,,,,26,35,35,60,2021
+Maharashtra,Bombay High Court,High Court of Bombay at Goa,Total,900,1929,1245,1348,314,2,,5738,,,,,,,,,,,136,173,745,851,2021
+Maharashtra,Bombay High Court,"Principal Bench,Appellate Side",Civil,17951,31367,19318,24566,33681,3733,1,130617,49713,8743,19847,3055,2071,2924,3,,437,8601,2245,1340,15163,14149,2021
+Maharashtra,Bombay High Court,"Principal Bench,Appellate Side",Criminal,13614,18088,8699,9900,9350,808,6,60465,20831,0,0,15955,91,3928,10,,1,16061,1646,1513,4865,4331,2021
+Maharashtra,Bombay High Court,"Principal Bench,Appellate Side",Total,31565,49455,28017,34466,43031,4541,7,191082,70544,8743,19847,19010,2162,6852,13,,438,24662,3891,2853,20028,18480,2021
+Maharashtra,Bombay High Court,"Principal Bench,Original Side",Civil,17385,27200,14880,20568,14448,327,4,94812,10692,,109,15101,19408,,982,11182,,25817,1910,917,3339,3514,2021
+Maharashtra,Bombay High Court,"Principal Bench,Original Side",Criminal,0,0,0,0,0,0,0,0,0,,0,0,0,,0,0,,0,0,0,0,0,2021
+Maharashtra,Bombay High Court,"Principal Bench,Original Side",Total,17385,27200,14880,20568,14448,327,4,94812,10692,,109,15101,19408,,982,11182,,25817,1910,917,3339,3514,2021
+Manipur,High Court of Manipur,Principal Bench Manipur,Civil,1643,1524,546,280,361,1,,4355,2385,55,54,172,255,21,0,,46,1320,255,238,716,391,2021
+Manipur,High Court of Manipur,Principal Bench Manipur,Criminal,242,129,49,12,37,0,,469,14,0,0,106,8,0,3,,0,210,36,29,62,35,2021
+Manipur,High Court of Manipur,Principal Bench Manipur,Total,1885,1653,595,292,398,1,,4824,2399,55,54,278,263,21,3,,46,1530,291,267,778,426,2021
+Meghalaya,High Court of Meghalaya,Principal Bench Meghalaya,Civil,685,388,161,88,,,,1322,761,8,2,103,28,65,,,7,334,82,54,137,127,2021
+Meghalaya,High Court of Meghalaya,Principal Bench Meghalaya,Criminal,101,49,2,4,,,,156,0,0,0,42,70,0,,,0,33,10,35,16,23,2021
+Meghalaya,High Court of Meghalaya,Principal Bench Meghalaya,Total,786,437,163,92,,,,1478,761,8,2,145,98,65,,,7,367,92,89,153,150,2021
+Orissa,Orissa High Court,Principal Bench Orissa,Civil,36599,20630,20027,33122,16413,3302,823,130916,81095,9215,6510,13539,11989,3441,25,13,2318,2771,10926,8254,16148,10777,2021
+Orissa,Orissa High Court,Principal Bench Orissa,Criminal,17629,7260,6053,10300,10043,1029,19,52333,504,0,0,12877,959,9417,2,0,0,28574,4048,4170,3063,1913,2021
+Orissa,Orissa High Court,Principal Bench Orissa,Total,54228,27890,26080,43422,26456,4331,842,183249,81599,9215,6510,26416,12948,12858,27,13,2318,31345,14974,12424,19211,12690,2021
+Punjab,High Court of Punjab and Haryana,Principal Bench Punjab,Civil,45063,71696,46094,51014,61889,9369,,285125,188,52801,35727,7807,10124,13,306,6,8011,371,6322,4169,15305,13856,2021
+Punjab,High Court of Punjab and Haryana,Principal Bench Punjab,Criminal,39603,40919,24288,38759,23761,413,,167743,0,0,368,68436,152,21943,16,0,0,10811,7833,8217,6402,5970,2021
+Punjab,High Court of Punjab and Haryana,Principal Bench Punjab,Total,84666,112615,70382,89773,85650,9782,,452868,188,52801,36095,76243,10276,21956,322,6,8011,11182,14196,12390,21707,19826,2021
+Rajasthan,High Court of Rajasthan,High Court Bench at Jaipur,Civil,56381,78236,39963,42542,27852,2256,73,247303,93236,5666,12507,37353,4783,1986,5,11,877,90879,4655,2124,25505,22349,2021
+Rajasthan,High Court of Rajasthan,High Court Bench at Jaipur,Criminal,23622,25152,12284,12512,13314,3197,285,90366,1587,0,0,26904,18476,11954,8,0,1,31436,4799,4037,20787,5523,2021
+Rajasthan,High Court of Rajasthan,High Court Bench at Jaipur,Total,80003,103388,52247,55054,41166,5453,358,337669,94823,5666,12507,64257,23259,13940,13,11,878,122315,9454,6161,46292,27872,2021
+Rajasthan,High Court of Rajasthan,Principal Seat Jodhpur,Civil,45100,56661,18125,24700,22053,2176,42,168857,62495,3020,9998,32342,4204,1352,4,1,604,54161,4495,3539,11997,16106,2021
+Rajasthan,High Court of Rajasthan,Principal Seat Jodhpur,Criminal,16913,14729,5269,7044,10680,3389,123,58147,378,0,0,21620,9956,9215,5,0,0,16776,4500,2252,3384,3218,2021
+Rajasthan,High Court of Rajasthan,Principal Seat Jodhpur,Total,62013,71390,23394,31744,32733,5565,165,227004,62873,3020,9998,53962,14160,10567,9,1,604,70937,8995,5791,15381,19324,2021
+Sikkim,High Court of Sikkim,Principal Bench Sikkim,Civil,99,51,19,4,1,,,174,97,16,29,25,3,3,,,1,0,12,13,28,19,2021
+Sikkim,High Court of Sikkim,Principal Bench Sikkim,Criminal,28,6,1,0,0,,,35,2,0,0,20,3,9,,,0,1,7,5,4,2,2021
+Sikkim,High Court of Sikkim,Principal Bench Sikkim,Total,127,57,20,4,1,,,209,99,16,29,45,6,12,,,1,1,19,18,32,21,2021
+Tamil Nadu,Madras High Court,Madurai Bench of Madras High Court,Civil,48869,46922,31512,19089,17415,1693,63,165563,,,,,,,,,,,6836,4500,8717,2036,2021
+Tamil Nadu,Madras High Court,Madurai Bench of Madras High Court,Criminal,12138,5507,1416,169,1760,1,0,20991,,,,,,,,,,,4146,3407,2156,1679,2021
+Tamil Nadu,Madras High Court,Madurai Bench of Madras High Court,Total,61007,52429,32928,19258,19175,1694,63,186554,,,,,,,,,,,10982,7907,10873,3715,2021
+Tamil Nadu,Madras High Court,Principal Bench Tamilnadu,Civil,80359,74749,61818,47684,83887,9497,561,358555,86954,11830,4611,21171,176621,9530,100,759,3095,37462,11296,11971,9436,5367,2021
+Tamil Nadu,Madras High Court,Principal Bench Tamilnadu,Criminal,11377,12675,10415,1766,3380,37,0,39650,0,0,0,3363,33151,3010,2,0,0,0,4553,4765,3094,2767,2021
+Tamil Nadu,Madras High Court,Principal Bench Tamilnadu,Total,91736,87424,72233,49450,87267,9534,561,398205,86954,11830,4611,24534,209772,12540,102,759,3095,37462,15849,16736,12530,8134,2021
+Telangana,High Court for State of Telangana,Principal Bench at Hyderabad,Civil,32263,45350,42583,55806,32181,2298,1051,211532,129562,5599,8211,42865,12861,10877,1,2,66,2084,,,15247,11437,2021
+Telangana,High Court for State of Telangana,Principal Bench at Hyderabad,Criminal,7576,10386,5741,8761,2926,711,52,36153,0,0,0,9324,17444,9473,0,0,0,0,,,2102,1712,2021
+Telangana,High Court for State of Telangana,Principal Bench at Hyderabad,Total,39839,55736,48324,64567,35107,3009,1103,247685,129562,5599,8211,52189,30305,20350,1,2,66,2084,,,17349,13149,2021
+Tripura,High Court of Tripura,Principal Bench Tripura,Civil,1144,221,49,2,,,,1416,652,73,77,4,53,,,,14,0,213,192,266,205,2021
+Tripura,High Court of Tripura,Principal Bench Tripura,Criminal,175,49,7,1,,,,232,0,0,0,0,0,,,,0,6,37,33,27,26,2021
+Tripura,High Court of Tripura,Principal Bench Tripura,Total,1319,270,56,3,,,,1648,652,73,77,4,53,,,,14,6,250,225,293,231,2021
+Uttar Pradesh,Allahabad High Court,Allahabad Bench,Civil,46284,58963,49706,101029,107508,29218,27819,420527,270762,43768,70464,5905,20969,6373,5,57,,1402,9495,9340,23078,16980,2021
+Uttar Pradesh,Allahabad High Court,Allahabad Bench,Criminal,65240,63747,43325,72481,103067,21000,14980,383840,17120,0,0,154246,72,36795,0,0,,175162,10879,9919,19984,11905,2021
+Uttar Pradesh,Allahabad High Court,Allahabad Bench,Total,111524,122710,93031,173510,210575,50218,42799,804367,287882,43768,70464,160151,21041,43168,5,57,,176564,20374,19259,43062,28885,2021
+Uttarakhand,High Court Of Uttarakhand,Principal Bench Uttarakhand,Civil,6219,8773,4550,3552,1275,1,,24370,14738,1285,1118,5039,1321,637,16,,,98,769,800,2489,3621,2021
+Uttarakhand,High Court Of Uttarakhand,Principal Bench Uttarakhand,Criminal,6074,4920,2510,2681,676,0,,16861,2194,0,0,5352,11,2408,9,,,6887,970,783,1277,1600,2021
+Uttarakhand,High Court Of Uttarakhand,Principal Bench Uttarakhand,Total,12293,13693,7060,6233,1951,1,,41231,16932,1285,1118,10391,1332,3045,25,,,6985,1739,1583,3766,5221,2021
+West Bengal,Calcutta High Court,Circuit Bench At Jalpaiguri,Civil,883,150,,,,,,1033,,,,,,,,,,,608,529,256,251,2021
+West Bengal,Calcutta High Court,Circuit Bench At Jalpaiguri,Total,1337,236,,,,,,1573,,,,,,,,,,,736,761,302,299,2021
+West Bengal,Calcutta High Court,Circuit Bench At Port Blair,Civil,263,69,2,1,1,,,336,,,,,,,,,,,73,94,65,65,2021
+West Bengal,Calcutta High Court,Circuit Bench At Port Blair,Criminal,25,18,2,0,0,,,45,,,,,,,,,,,9,7,4,3,2021
+West Bengal,Calcutta High Court,Circuit Bench At Port Blair,Total,288,87,4,1,1,,,381,,,,,,,,,,,82,101,69,68,2021
+West Bengal,Calcutta High Court,"Principal Bench, Original Side",Civil,3261,2496,2019,4586,3371,2322,1694,19749,,,,,,,,,,,750,661,489,97,2021
+West Bengal,Calcutta High Court,"Principal Bench, Original Side",Criminal,0,0,0,0,0,0,0,0,,,,,,,,,,,0,0,0,0,2021
+West Bengal,Calcutta High Court,"Principal Bench, Original Side",Total,3261,2496,2019,4586,3371,2322,1694,19749,,,,,,,,,,,750,661,489,97,2021
+West Bengal,Calcutta High Court,"Principal Bench,Appellate Side",Civil,21036,22233,17820,39788,46555,12905,7661,167998,,,,,,,,,,,2701,4818,3549,2019,2021
+West Bengal,Calcutta High Court,"Principal Bench,Appellate Side",Criminal,5799,5955,4604,9751,6472,1747,831,35159,,,,,,,,,,,1036,3322,387,356,2021
+West Bengal,Calcutta High Court,"Principal Bench,Appellate Side",Total,26835,28188,22424,49539,53027,14652,8492,203157,,,,,,,,,,,3737,8140,3936,2375,2021

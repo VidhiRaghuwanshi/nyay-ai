@@ -1,12 +1,6 @@
 """Outcome Calibration Service"""
 import logging
-import random
 from typing import Dict, Any, List
-
-try:
-    import numpy as np
-except ImportError:
-    np = None
 
 logger = logging.getLogger(__name__)
 
@@ -33,23 +27,21 @@ class OutcomeCalibrationService:
             # Get prediction factors
             factors = self._get_prediction_factors(case_data)
             
-            # Calculate calibration metrics
-            model_accuracy = random.uniform(75, 90)
-            calibration_error = abs(100 - model_accuracy) / 100
-            
             return {
                 "win_probability": win_prob,
                 "confidence_level": confidence_level,
-                "model_accuracy": model_accuracy,
-                "calibration_error": calibration_error,
+                "model_accuracy": None,
+                "calibration_error": None,
+                "evaluation_status": "not_evaluated",
+                "evaluation_note": "Outcome accuracy requires labeled historical outcome data; no such labels are currently configured.",
                 "factors": factors,
                 "outcome_distribution": {
                     "plaintiff_win": win_prob,
-                    "defendant_win": 100 - win_prob,
-                    "settlement": (100 - win_prob) * 0.3,
-                    "dismissal": (100 - win_prob) * 0.2
+                    "defendant_win": round((100 - win_prob) * 0.5, 2),
+                    "settlement": round((100 - win_prob) * 0.3, 2),
+                    "dismissal": round((100 - win_prob) * 0.2, 2)
                 },
-                "data_points_used": 156
+                "data_points_used": 0
             }
             
         except Exception as e:
@@ -68,9 +60,13 @@ class OutcomeCalibrationService:
         if case_data.get("precedent_strength"):
             base_prob += case_data["precedent_strength"] * 0.15
         
-        # Add randomness for demo
-        base_prob += random.uniform(-10, 10)
-        
+        # Keep the score deterministic so the same case produces the same result.
+        text = str(case_data.get("description", "")).lower()
+        if any(term in text for term in ("strong evidence", "documentary evidence", "admission", "precedent supports")):
+            base_prob += 8
+        if any(term in text for term in ("contradiction", "insufficient evidence", "delay", "default", "limitation")):
+            base_prob -= 8
+
         return min(95, max(5, base_prob))
     
     def _determine_confidence(self, win_prob: float, case_data: Dict) -> str:

@@ -2,7 +2,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from app.middleware.audit_middleware import AuditMiddleware
 from app.config.settings import settings
+from app.services.request_security import validate_startup_security
 from app.api import (
     precedent_routes,
     risk_detector_routes,
@@ -10,10 +12,15 @@ from app.api import (
     chatbot_routes,
     outcome_routes,
     drafting_routes,
-    prediction_routes
+    prediction_routes,
+    legaltech_routes,
+    contract_routes,
+    advanced_legaltech_routes
 )
+from app.api import auth_routes
 
 # Create FastAPI app
+validate_startup_security()
 app = FastAPI(
     title=settings.API_TITLE,
     description=settings.API_DESCRIPTION,
@@ -31,8 +38,9 @@ app.add_middleware(
 
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["localhost", "127.0.0.1"]
+    allowed_hosts=settings.TRUSTED_HOSTS
 )
+app.add_middleware(AuditMiddleware)
 
 # Health check endpoint
 @app.get("/health")
@@ -51,12 +59,16 @@ app.include_router(chatbot_routes.router, prefix="/api/chatbot", tags=["Chatbot"
 app.include_router(outcome_routes.router, prefix="/api/outcome", tags=["Outcome Calibration"])
 app.include_router(drafting_routes.router, prefix="/api/drafting", tags=["Auto Drafting"])
 app.include_router(prediction_routes.router, prefix="/api/prediction", tags=["Case Prediction"])
+app.include_router(legaltech_routes.router, prefix="/api/legaltech", tags=["LegalTech Modules"])
+app.include_router(contract_routes.router, prefix="/api/contracts", tags=["Contract Analysis"])
+app.include_router(advanced_legaltech_routes.router, prefix="/api/legaltech", tags=["Advanced LegalTech"])
+app.include_router(auth_routes.router, prefix="/api/auth", tags=["Authentication"])
 
 # Root endpoint
 @app.get("/")
 async def root():
     return {
-        "message": "Indian Judiciary AI System API",
+        "message": "Nyay AI API",
         "version": settings.API_VERSION,
         "docs": "/docs",
         "health": "/health"

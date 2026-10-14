@@ -10,6 +10,11 @@ import ContradictionDetector from './pages/ContradictionDetector';
 import ChatBot from './pages/ChatBot';
 import AutoDrafting from './pages/AutoDrafting';
 import CasePrediction from './pages/CasePrediction';
+import Dictation from './pages/Dictation';
+import Chronology from './pages/Chronology';
+import CourtDocket from './pages/CourtDocket';
+import ClientPortal from './pages/ClientPortal';
+import Analytics from './pages/Analytics';
 
 import './App.css';
 
@@ -57,7 +62,7 @@ function App() {
             fontSize: 16,
             color: 'var(--ink)'
           }}>
-            LegalAI
+            Nyay AI
           </span>
         </div>
 
@@ -70,6 +75,11 @@ function App() {
             <Route path="/chatbot" element={<ChatBot />} />
             <Route path="/prediction" element={<CasePrediction />} />
             <Route path="/drafting" element={<AutoDrafting />} />
+            <Route path="/dictation" element={<Dictation />} />
+            <Route path="/chronology" element={<Chronology />} />
+            <Route path="/court-docket" element={<CourtDocket />} />
+            <Route path="/client-portal" element={<ClientPortal />} />
+            <Route path="/analytics" element={<Analytics />} />
           </Routes>
         </div>
 
@@ -81,7 +91,7 @@ function App() {
           fontSize: 12,
           color: 'var(--ink-faint)'
         }}>
-          <p>LegalAI — Indian Judiciary Intelligence System &middot; For informational purposes only &middot; Consult a qualified attorney for legal advice</p>
+          <p>Nyay AI — Indian Legal Intelligence System &middot; For informational purposes only &middot; Consult a qualified attorney for legal advice</p>
         </footer>
       </main>
     </Router>

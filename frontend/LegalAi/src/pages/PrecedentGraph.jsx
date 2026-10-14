@@ -99,22 +99,35 @@ export default function PrecedentGraph() {
     const centerX = 450, centerY = 260;
     const caseNodes = nodes.filter(n => n.type === 'case');
     const sectionNodes = nodes.filter(n => n.type === 'section');
-    const caseRadius = Math.min(200, 100 + caseNodes.length * 6);
-    const secRadius = caseRadius + 60;
+    const degree = new Map();
+    edges.forEach((edge) => {
+      degree.set(edge.source, (degree.get(edge.source) || 0) + 1);
+      degree.set(edge.target, (degree.get(edge.target) || 0) + 1);
+    });
+    const hash = (value) => Array.from(String(value)).reduce(
+      (total, character) => ((total * 31) + character.charCodeAt(0)) % 1000003,
+      7
+    );
+    const orderedCases = [...caseNodes].sort((a, b) => hash(a.id) - hash(b.id));
+    const caseRadius = Math.min(215, 105 + orderedCases.length * 5 + (edges.length % 7) * 5);
+    const secRadius = caseRadius + 55 + (sectionNodes.length % 4) * 10;
 
-    caseNodes.forEach((node, i) => {
+    orderedCases.forEach((node, i) => {
       if (caseNodes.length === 1) {
         positions[node.id] = [centerX, centerY];
       } else {
-        const angle = (2 * Math.PI * i) / caseNodes.length - Math.PI / 2;
+        const angle = (2 * Math.PI * i) / orderedCases.length - Math.PI / 2
+          + ((hash(node.id) % 17) - 8) / 100;
+        const nodeRadius = caseRadius + Math.min(35, (degree.get(node.id) || 0) * 4);
         positions[node.id] = [
-          centerX + caseRadius * Math.cos(angle),
-          centerY + caseRadius * Math.sin(angle),
+          centerX + nodeRadius * Math.cos(angle),
+          centerY + nodeRadius * Math.sin(angle),
         ];
       }
     });
     sectionNodes.forEach((node, i) => {
-      const angle = (2 * Math.PI * i) / (sectionNodes.length || 1) - Math.PI / 4;
+      const angle = (2 * Math.PI * i) / (sectionNodes.length || 1) - Math.PI / 4
+        + ((hash(node.id) % 13) - 6) / 100;
       positions[node.id] = [
         centerX + secRadius * Math.cos(angle),
         centerY + secRadius * Math.sin(angle),
@@ -205,7 +218,9 @@ export default function PrecedentGraph() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
                   Citation Graph
-                  <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--ink-faint)', marginLeft: 8 }}>{nodes.length} nodes · {edges.length} links</span>
+                  <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--ink-faint)', marginLeft: 8 }}>
+                    {nodes.length} nodes · {edges.length} links · “{searchResults?.query}”
+                  </span>
                 </h2>
                 <div style={{ display: 'flex', gap: 4 }}>
                   <button onClick={() => setZoom(Math.min(zoom + 0.15, 2.5))} className="btn-ghost" style={{ padding: '6px 8px' }}><ZoomIn size={16} /></button>

@@ -1,33 +1,23 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Network, AlertTriangle, Clock, MessageSquare, TrendingUp, FileText, ArrowRight, BarChart3, Shield, Scale, BookOpen, Wifi, WifiOff, Gauge, Sparkles, CheckCircle2, Users, Zap, ChevronRight } from 'lucide-react';
 import StatCard from '../components/StatCard';
-import { checkHealth, predictionAPI } from '../services/api';
+import { checkHealth } from '../services/api';
 
 export default function Dashboard() {
   const [backendStatus, setBackendStatus] = useState('checking');
-  const [backendInfo, setBackendInfo] = useState(null);
-  const [liveStats, setLiveStats] = useState(null);
   const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
     const check = async () => {
       try {
-        const data = await checkHealth();
+        await checkHealth();
         setBackendStatus('connected');
-        setBackendInfo(data);
       } catch {
         setBackendStatus('offline');
       }
     };
-    const fetchStats = async () => {
-      try {
-        const stats = await predictionAPI.getStats();
-        setLiveStats(stats);
-      } catch { /* ignore */ }
-    };
     check();
-    fetchStats();
   }, []);
 
   // Auto-cycle through How It Works steps

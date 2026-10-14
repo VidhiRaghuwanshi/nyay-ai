@@ -77,6 +77,11 @@ copy .env.example .env
 4. Create API key in Credentials section
 5. Copy key to `.env` file as `GOOGLE_API_KEY`
 
+Keep the key only in `backend/.env` or your deployment provider's secret store.
+Do not put it in `frontend/LegalAi/.env*`, React source files, browser requests,
+Git commits, screenshots, or issue reports. If a key has already been exposed,
+revoke it in Google Cloud Console and create a replacement.
+
 ### **Step 3: Create Main Entry Point**
 
 Create file: `backend/run.py`

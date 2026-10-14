@@ -1,7 +1,9 @@
 """API Routes - Chatbot with Document Upload Support"""
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from app.models.schemas import ChatRequest, ChatResponse
 from app.services.google_api_service import GoogleAPIClient
+from app.services.evidence_service import EvidenceExtractionError, extract_evidence_text
+from app.services.request_security import authenticated_identity, validate_upload
 import logging
 import uuid
 import re
@@ -13,6 +15,15 @@ google_client = GoogleAPIClient()
 # In-memory document store keyed by conversation_id. Each conversation can contain
 # multiple documents so a case can be reviewed as one record.
 document_store = {}
+
+
+def _owned_conversation(conversation_id, identity):
+    conversation = document_store.get(conversation_id)
+    if not conversation:
+        return None
+    if conversation["owner"] != identity:
+        raise HTTPException(status_code=404, detail="Conversation was not found.")
+    return conversation
 
 
 def extract_case_metadata(text: str) -> dict:
@@ -83,13 +94,17 @@ def extract_pdf_text(content: bytes) -> str:
 
 
 @router.post("/ask", response_model=dict)
-async def ask_chatbot(request: ChatRequest):
+async def ask_chatbot(request: ChatRequest, identity=Depends(authenticated_identity)):
     """Ask legal question to chatbot, optionally with document context"""
     try:
         # Check if there's uploaded document context for this conversation
         doc_context = None
-        if request.conversation_id and request.conversation_id in document_store:
-            documents = document_store[request.conversation_id]
+        if request.conversation_id:
+            conversation = _owned_conversation(request.conversation_id, identity)
+            documents = conversation["documents"] if conversation else []
+        else:
+            documents = []
+        if documents:
             doc_context = {
                 "filename": ", ".join(document["filename"] for document in documents),
                 "size": sum(document["size"] for document in documents),
@@ -116,6 +131,8 @@ async def ask_chatbot(request: ChatRequest):
             document_context=doc_context,
             chat_history=request.context.get("chat_history", []) if request.context else [],
         )
+        if response.get("success") is False:
+            raise HTTPException(status_code=503, detail=response.get("detail"))
         
         return {
             "message_id": str(uuid.uuid4()),
@@ -127,6 +144,8 @@ async def ask_chatbot(request: ChatRequest):
             "document_context_active": doc_context is not None,
             "quota_notice": response.get("quota_notice"),
         }
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error in ask_chatbot: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -135,7 +154,8 @@ async def ask_chatbot(request: ChatRequest):
 @router.post("/upload")
 async def upload_document(
     file: UploadFile = File(...),
-    conversation_id: str = Form(default=None)
+    conversation_id: str = Form(default=None),
+    identity=Depends(authenticated_identity),
 ):
     """Upload a document for case-specific Q&A"""
     try:
@@ -144,31 +164,24 @@ async def upload_document(
         
         # Read file content
         content = await file.read()
+        safe_name = validate_upload(
+            file,
+            content,
+            allowed_extensions={".pdf", ".docx", ".txt", ".md"},
+            max_bytes=10 * 1024 * 1024,
+        )
+        existing = document_store.get(conversation_id)
+        if existing and existing["owner"] != identity:
+            raise HTTPException(status_code=404, detail="Conversation was not found.")
         
-        # Extract text based on file type
-        filename = file.filename.lower()
-        text = ""
-        
-        if filename.endswith(".txt"):
-            text = content.decode("utf-8", errors="ignore")
-        elif filename.endswith(".pdf"):
-            text = extract_pdf_text(content)
-        elif filename.endswith((".doc", ".docx")):
-            # Basic text extraction
-                if filename.endswith('.docx'):
-                    try:
-                        import io
-                        from docx import Document
-                        document = Document(io.BytesIO(content))
-                        text = "\n".join(paragraph.text for paragraph in document.paragraphs)
-                        for table in document.tables:
-                            text += "\n" + "\n".join(" | ".join(cell.text for cell in row.cells) for row in table.rows)
-                    except ImportError:
-                        raise HTTPException(status_code=503, detail="DOCX extraction is unavailable. Install backend requirements and restart the server.")
-                else:
-                    raise HTTPException(status_code=400, detail="Legacy .doc files are not supported. Save the document as .docx or PDF and upload again.")
-        else:
-            text = content.decode("utf-8", errors="ignore")
+        # Use the shared evidence extractor so scanned PDFs can also be OCR'd.
+        try:
+            text, _ = extract_evidence_text(safe_name, content)
+        except EvidenceExtractionError as error:
+            raise HTTPException(status_code=422, detail=str(error)) from error
+        except Exception as error:
+            logger.warning("Document extraction failed for %s: %s", file.filename, type(error).__name__)
+            raise HTTPException(status_code=422, detail="The uploaded document could not be extracted.") from error
         
         if not text.strip():
             raise HTTPException(
@@ -184,25 +197,28 @@ async def upload_document(
             text = text[:15000] + "\n\n[Document truncated...]"
         
         document = {
-            "filename": file.filename,
+            "filename": safe_name,
             "size": len(content),
             "text": text,
             "metadata": extract_case_metadata(text),
             "char_count": len(text),
         }
-        document_store.setdefault(conversation_id, []).append(document)
+        conversation = document_store.setdefault(
+            conversation_id,
+            {"owner": identity, "documents": []},
+        )
+        conversation["documents"].append(document)
         
-        logger.info(f"Document uploaded: {file.filename} ({len(text)} chars) for conversation {conversation_id}")
+        logger.info("Document uploaded: %s (%s chars)", safe_name, len(text))
         
         return {
             "conversation_id": conversation_id,
             "filename": file.filename,
             "size": len(content),
             "char_count": len(text),
-            "document_count": len(document_store[conversation_id]),
-            "text": text,
+            "document_count": len(conversation["documents"]),
             "status": "uploaded",
-            "message": f"Document '{file.filename}' uploaded successfully. You can now ask questions about it."
+            "message": f"Document '{safe_name}' uploaded successfully. You can now ask questions about it."
         }
     except HTTPException:
         raise
@@ -212,8 +228,9 @@ async def upload_document(
 
 
 @router.delete("/document/{conversation_id}")
-async def remove_document(conversation_id: str):
+async def remove_document(conversation_id: str, identity=Depends(authenticated_identity)):
     """Remove uploaded document from context"""
+    _owned_conversation(conversation_id, identity)
     if conversation_id in document_store:
         del document_store[conversation_id]
         return {"status": "removed", "conversation_id": conversation_id}
@@ -221,22 +238,30 @@ async def remove_document(conversation_id: str):
 
 
 @router.post("/classify")
-async def classify_issue(request: ChatRequest):
+async def classify_issue(request: ChatRequest, identity=Depends(authenticated_identity)):
     """Classify legal issue"""
     try:
         result = await google_client.classify_legal_issue(request.message)
+        if result.get("success") is False:
+            raise HTTPException(status_code=503, detail=result.get("detail"))
         return result
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error classifying issue: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/extract-entities")
-async def extract_entities(request: ChatRequest):
+async def extract_entities(request: ChatRequest, identity=Depends(authenticated_identity)):
     """Extract entities from case text"""
     try:
         result = await google_client.extract_case_entities(request.message)
+        if result.get("success") is False:
+            raise HTTPException(status_code=503, detail=result.get("detail"))
         return result
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error extracting entities: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

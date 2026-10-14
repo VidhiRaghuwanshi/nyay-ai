@@ -11,14 +11,19 @@ class DataLoaderService:
     def __init__(self):
         self.datasets_path = Path(__file__).parent.parent.parent.parent / "datasets"
         self.judicial_data = None
+        self.court_backlog_data = None
+        self.judgment_data = None
         self.case_precedents = None
         self.precedent_cases = None  # From JSON
         self.precedent_index = {}    # Quick lookup by ID
+        self.dataset_metadata = {}
         self._load_data()
     
     def _load_data(self):
         """Load all datasets on initialization"""
         self.load_judicial_delay_data()
+        self.load_court_backlog_data()
+        self.load_judgment_data()
         self._generate_precedent_cases()
         self.load_precedent_json()
     
@@ -28,11 +33,69 @@ class DataLoaderService:
             file_path = self.datasets_path / "judicial_delay_dataset.csv"
             if file_path.exists():
                 self.judicial_data = pd.read_csv(file_path)
+                self._record_dataset(file_path.name, len(self.judicial_data), list(self.judicial_data.columns))
                 return self.judicial_data
             return None
         except Exception as e:
             print(f"Error loading judicial data: {e}")
             return None
+
+    def load_court_backlog_data(self) -> Optional[pd.DataFrame]:
+        """Load NDAP high-court backlog data when available."""
+        file_path = self.datasets_path / "NDAP_REPORT_7149.csv"
+        try:
+            if not file_path.exists():
+                return None
+            frame = pd.read_csv(file_path)
+            numeric_columns = [
+                column for column in frame.columns
+                if column.startswith("Cases pending")
+                or column.startswith("Pending cases")
+                or column.startswith("Cases that were")
+                or column.startswith("Writ petition")
+                or column.startswith("Second appeal")
+                or column.startswith("First appeal")
+                or column.startswith("Appeal cases")
+                or column.startswith("Petition cases")
+                or column.startswith("Revision cases")
+                or column.startswith("Reference cases")
+                or column.startswith("Suit cases")
+                or column.startswith("Review cases")
+                or column.startswith("Application cases")
+            ]
+            for column in numeric_columns:
+                frame[column] = pd.to_numeric(frame[column], errors="coerce").fillna(0)
+            self.court_backlog_data = frame
+            self._record_dataset(file_path.name, len(frame), list(frame.columns))
+            return frame
+        except Exception as error:
+            print(f"Error loading court backlog data: {error}")
+            return None
+
+    def load_judgment_data(self) -> Optional[pd.DataFrame]:
+        """Load Supreme Court judgment metadata for citation-aware search."""
+        file_path = self.datasets_path / "judgments.csv"
+        try:
+            if not file_path.exists():
+                return None
+            frame = pd.read_csv(file_path, dtype=str).fillna("")
+            frame["judgment_dates"] = pd.to_datetime(
+                frame["judgment_dates"], dayfirst=True, errors="coerce"
+            )
+            self.judgment_data = frame
+            self._record_dataset(file_path.name, len(frame), list(frame.columns))
+            return frame
+        except Exception as error:
+            print(f"Error loading judgment data: {error}")
+            return None
+
+    def _record_dataset(self, name: str, rows: int, columns: List[str]) -> None:
+        self.dataset_metadata[name] = {
+            "name": name,
+            "rows": rows,
+            "columns": columns,
+            "path": str(self.datasets_path / name),
+        }
     
     def load_precedent_json(self) -> Optional[List[Dict]]:
         """Load precedent cases from JSON file"""
@@ -182,6 +245,56 @@ class DataLoaderService:
         
         results.sort(key=lambda x: x["relevance_score"], reverse=True)
         return results[:limit]
+
+    def search_judgments(self, query: str, limit: int = 20) -> List[Dict]:
+        """Search judgment metadata using party names, advocates, bench and case number."""
+        if self.judgment_data is None or not query.strip():
+            return []
+        query_terms = [term for term in query.lower().split() if len(term) > 1]
+        searchable_columns = [
+            "case_no", "pet", "res", "pet_adv", "res_adv",
+            "bench", "judgement_by", "diary_no",
+        ]
+        results = []
+        for _, row in self.judgment_data.iterrows():
+            haystack = " ".join(str(row.get(column, "")) for column in searchable_columns).lower()
+            score = sum(1 for term in query_terms if term in haystack)
+            if score == 0:
+                continue
+            results.append({
+                "id": f"SC-{row.get('diary_no', '')}",
+                "diary_no": row.get("diary_no", ""),
+                "case_no": row.get("case_no", ""),
+                "petitioner": row.get("pet", ""),
+                "respondent": row.get("res", ""),
+                "bench": row.get("bench", ""),
+                "judgment_by": row.get("judgement_by", ""),
+                "judgment_date": (
+                    row["judgment_dates"].date().isoformat()
+                    if not pd.isna(row["judgment_dates"]) else None
+                ),
+                "source_path": row.get("temp_link", ""),
+                "relevance_score": score,
+            })
+        results.sort(key=lambda item: item["relevance_score"], reverse=True)
+        return results[:limit]
+
+    def get_dataset_catalog(self) -> Dict[str, Dict]:
+        """Return safe metadata for all datasets loaded by Nyay AI."""
+        catalog = dict(self.dataset_metadata)
+        if self.judicial_data is not None and "judicial_delay_dataset.csv" not in catalog:
+            self._record_dataset(
+                "judicial_delay_dataset.csv",
+                len(self.judicial_data),
+                list(self.judicial_data.columns),
+            )
+        if self.precedent_cases is not None and "precedent_cases.json" not in catalog:
+            self._record_dataset(
+                "precedent_cases.json",
+                len(self.precedent_cases),
+                list(self.precedent_cases[0].keys()) if self.precedent_cases else [],
+            )
+        return dict(self.dataset_metadata)
     
     def get_precedent_by_id(self, case_id: str) -> Optional[Dict]:
         """Get a specific precedent case by ID"""
@@ -388,6 +501,7 @@ class DataLoaderService:
             "case_types": self.judicial_data["case_type"].unique().tolist(),
             "states": self.judicial_data["state"].unique().tolist(),
             "avg_disposal_rate": float(self.judicial_data["historical_disposal_rate"].mean()),
+            "loaded_datasets": self.get_dataset_catalog(),
         }
 
 # Create singleton instance

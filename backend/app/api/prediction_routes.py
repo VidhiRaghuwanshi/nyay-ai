@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 from app.services.prediction_service import prediction_service
+from app.services.data_loader import data_loader
 
 
 class PredictionRequest(BaseModel):
@@ -46,4 +47,50 @@ async def get_stats():
         return prediction_service.get_dataset_stats()
     except Exception as e:
         logger.error(f"Stats error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/datasets")
+async def get_dataset_catalog():
+    """Return loaded dataset metadata without exposing file contents."""
+    try:
+        return {
+            "datasets": data_loader.get_dataset_catalog(),
+            "judgment_rows": len(data_loader.judgment_data) if data_loader.judgment_data is not None else 0,
+            "court_backlog_rows": (
+                len(data_loader.court_backlog_data)
+                if data_loader.court_backlog_data is not None else 0
+            ),
+        }
+    except Exception as e:
+        logger.error(f"Dataset catalog error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/evaluation")
+async def evaluate_prediction_model():
+    """Return reproducible delay-model evaluation metrics."""
+    try:
+        return prediction_service.evaluate_delay_model()
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except Exception as e:
+        logger.error(f"Evaluation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/judgments/search")
+async def search_judgments(q: str, limit: int = 20):
+    """Search the imported Supreme Court judgment metadata."""
+    if not q.strip():
+        raise HTTPException(status_code=400, detail="Search query cannot be empty.")
+    if limit < 1 or limit > 100:
+        raise HTTPException(status_code=400, detail="Limit must be between 1 and 100.")
+    try:
+        return {
+            "query": q,
+            "results": data_loader.search_judgments(q, limit),
+        }
+    except Exception as e:
+        logger.error(f"Judgment search error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
